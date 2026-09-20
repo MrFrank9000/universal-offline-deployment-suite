@@ -17,10 +17,22 @@
    - [APK BUILD] Android App Module: CURRENTLY PAUSED / UNDER CONSTRUCTION.
      This feature is temporarily disabled in this build for technical optimization.
 
-3. HOW TO RUN:
-   Simply download and run the pre-compiled binary matching your operating system.
-   Make sure to place your custom source archive (*.zip) into the same directory 
-   before starting the server or flasher modules.
+3. HOW TO BUILD FROM SOURCE (For Developers):
+   You can easily compile this application from source code on both Windows and Linux.
+   
+   Prerequisites:
+   - Python 3.x installed
+   - Standard package manager (pip) active
+   
+   Step 1: Install required developer dependencies:
+           pip install pyserial pyinstaller
+           
+   Step 2: Navigate into the source directory:
+           cd suite_src
+           
+   Step 3: Run the compiler command for your operating system:
+           [Windows]: python -m PyInstaller --clean --noconsole --onefile --name="universal-offline-deployment-suite" gui_main.py
+           [Linux]  : python3 -m PyInstaller --clean --noconsole --onefile --name="universal-offline-deployment-suite" gui_main.py
 
 4. DISCLAIMER / NO LIABILITY:
    This software is provided "as-is", without warranty of any kind. The developer 
@@ -47,10 +59,22 @@
    - [APK BUILD] Android App-Reiter: AKTUELL PAUSIERT / IN ARBEIT.
      Dieses Feature ist in dieser Testversion fuer Optimierungen temporaer deaktiviert.
 
-3. ANWENDUNG:
-   Starte einfach die fertig compilierte Ausfuehrungsdatei fuer dein Betriebssystem.
-   Stelle sicher, dass du dein eigenes Quell-Archiv (*.zip) in denselben Ordner 
-   gelegt hast, bevor du den Server oder den Flasher aktivierst.
+3. BAUANLEITUNG AUS DEM QUELLCODE (Fuer Entwickler):
+   Du kannst diese Anwendung ganz einfach aus den Skripten heraus unter Windows und Linux selbst compilieren.
+   
+   Voraussetzungen:
+   - Python 3.x installiert
+   - Standard-Paketmanager (pip) aktiv
+   
+   Schritt 1: Installiere die benoetigten Abhaengigkeiten:
+              pip install pyserial pyinstaller
+              
+   Schritt 2: Wechsle in das Quellcode-Verzeichnis:
+              cd suite_src
+              
+   Schritt 3: Starte den Compiler-Befehl fuer dein Betriebssystem:
+              [Windows]: python -m PyInstaller --clean --noconsole --onefile --name="universal-offline-deployment-suite" gui_main.py
+              [Linux]  : python3 -m PyInstaller --clean --noconsole --onefile --name="universal-offline-deployment-suite" gui_main.py
 
 4. HAFTUNGSAUSSCHLUSS:
    Diese Software wird ohne Maengelgewaehr zur Verfuegung gestellt. Der Entwickler 
