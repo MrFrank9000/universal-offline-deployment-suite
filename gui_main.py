@@ -1,5 +1,5 @@
 ﻿import os, sys, platform, tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import lang, mod_pc, mod_esp, mod_apk
 current_lang = "DE"
 
@@ -13,35 +13,27 @@ def log_to_console(text, clear=False):
 
 def update_progress(val, text): progress_bar["value"] = val; progress_lbl.config(text=text); root.update_idletasks()
 
-# KORREKTUR: Das maßgeschneiderte, unzerstörbare Dark-Mode-Pop-up für deine Credits!
 def show_external_credits():
     db = lang.translations[current_lang]
-    
-    # Erzeugt ein echtes Custom-Fenster ueber der Haupt-GUI
     popup = tk.Toplevel(root)
     popup.title(db["btn_credits"])
     popup.geometry("620x460")
     popup.configure(bg="#1a1a1a")
     popup.resizable(False, False)
-    
-    # Zentriert das Pop-up relativ zum Hauptfenster, damit es perfekt im Blickfeld liegt
     popup.transient(root)
     popup.grab_set()
     
-    # 1. Die Ueberschrift in fehlerfreiem Orange
     title_lbl = tk.Label(popup, text=db["btn_credits"], font=("Arial", 14, "bold"), fg="#ff8f00", bg="#1a1a1a", pady=15)
     title_lbl.pack()
     
-    # 2. Das Haupt-Textfeld in sterilem Weiß mit dunklem Hintergrund
     text_frame = tk.Frame(popup, bg="#121212", bd=1, relief=tk.SOLID)
     text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
     
     credits_box = tk.Text(text_frame, bg="#121212", fg="white", font=("Consolas", 10), wrap=tk.WORD, bd=0, padx=10, pady=10)
     credits_box.insert(tk.END, db["credits_text"])
-    credits_box.config(state=tk.DISABLED) # Schützt den Text vor versehentlichem Bearbeiten
+    credits_box.config(state=tk.DISABLED)
     credits_box.pack(fill=tk.BOTH, expand=True)
     
-    # 3. Der elegante Schließen-Button passend zum Rest der App
     close_btn = tk.Button(popup, text="OK", bg="#1976d2", fg="white", font=("Arial", 10, "bold"), bd=0, padx=25, pady=5, command=popup.destroy)
     close_btn.pack(pady=15)
 
@@ -107,8 +99,12 @@ zip_btn3 = tk.Button(tab_pc, bg="#2d2d2d", fg="white", font=("Arial", 10, "bold"
 zip_lbl3 = tk.Label(tab_pc, text="...", fg="gray", bg="#1a1a1a"); zip_lbl3.pack()
 
 pc_btn_frame = tk.Frame(tab_pc, bg="#1a1a1a"); pc_btn_frame.pack(pady=15)
-pc_start_btn = tk.Button(pc_btn_frame, bg="#388e3c", fg="white", font=("Arial", 11, "bold"), command=lambda: mod_pc.start_server_thread(log_to_console, update_progress, pc_start_btn, pc_stop_btn)); pc_start_btn.pack(side=tk.LEFT, padx=10)
-pc_stop_btn = tk.Button(pc_btn_frame, bg="#d32f2f", fg="white", font=("Arial", 11, "bold"), state=tk.DISABLED, command=lambda: mod_pc.stop_server_logic(log_to_console, update_progress, pc_start_btn, pc_stop_btn)); pc_stop_btn.pack(side=tk.LEFT, padx=10)
+pc_start_btn = tk.Button(pc_btn_frame, bg="#388e3c", fg="white", font=("Arial", 11, "bold"), command=lambda: mod_pc.start_server_thread(log_to_console, update_progress, pc_start_btn, pc_stop_btn, ip_display_lbl)); pc_start_btn.pack(side=tk.LEFT, padx=10)
+pc_stop_btn = tk.Button(pc_btn_frame, bg="#d32f2f", fg="white", font=("Arial", 11, "bold"), state=tk.DISABLED, command=lambda: mod_pc.stop_server_logic(log_to_console, update_progress, pc_start_btn, pc_stop_btn, ip_display_lbl)); pc_stop_btn.pack(side=tk.LEFT, padx=10)
+
+# UNZERSTÖRBAR: Das gigantische IP-Label gut sichtbar unter den Knöpfen platziert!
+ip_display_lbl = tk.Label(tab_pc, text="SERVER OFFLINE", font=("Arial", 14, "bold"), fg="gray", bg="#1a1a1a", pady=10)
+ip_display_lbl.pack()
 
 console_frame = tk.Frame(root, bg="#121212"); console_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 progress_frame = tk.Frame(console_frame, bg="#121212"); progress_frame.pack(fill=tk.X, pady=2)

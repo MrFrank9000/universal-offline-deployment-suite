@@ -1,100 +1,114 @@
-﻿import os
-import sys
-import glob
-import shutil
-import zipfile
-import threading
-from http.server import SimpleHTTPRequestHandler
-from socketserver import TCPServer
-import socket
-import tkinter as tk
+﻿import os, sys, shutil, zipfile, threading, http.server, socketserver, socket, tkinter as tk
+from tkinter import filedialog
 
-httpd = None
+selected_pc_zip = ""
+server_instance = None
 server_thread = None
-selected_pc_zip_path = ""
+
+def select_zip_file(lbl, log_callback):
+    global selected_pc_zip
+    f = filedialog.askopenfilename(filetypes=[("ZIP", "*.zip")])
+    if f:
+        selected_pc_zip = f
+        lbl.config(text=os.path.basename(f), fg="#39ff14")
+        log_callback(f"[PC SERVER] Loaded Target Website ZIP: {f}\n")
+
+class CustomHTTPHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
 
 def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()
-        s.close()
-        return ip
+        s.connect(('10.255.255.255', 1))
+        ip = s.getsockname()[0] # Holt exakt den String der primaeren Netzwerkkarte
     except Exception:
-        return "127.0.0.1"
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
 
-def select_pc_zip_file(zip_label, log_callback):
-    global selected_pc_zip_path
-    from tkinter import filedialog
-    file_path = filedialog.askopenfilename(filetypes=[("ZIP-Archive", "*.zip")])
-    if file_path:
-        selected_pc_zip_path = file_path
-        zip_label.config(text=os.path.basename(file_path), fg="#39ff14")
-        log_callback(f"[SYSTEM] PC ZIP source loaded: {file_path}\n")
-
-def start_pc_server_logic(update_progress, log_callback, start_btn, stop_btn, zip_btn, root):
-    global httpd, server_thread, selected_pc_zip_path
+# UNZERSTÖRBAR: Die Logic nimmt nun das ip_display_lbl der Haupt-GUI entgegen!
+def run_server_logic(log_callback, update_progress, start_btn, stop_btn, ip_display_lbl):
+    global server_instance, selected_pc_zip
     try:
-        if not selected_pc_zip_path or not os.path.exists(selected_pc_zip_path):
-            log_callback("ERROR: No ZIP file selected!\n")
-            update_progress(0, "ZIP missing!")
+        if not selected_pc_zip or not os.path.exists(selected_pc_zip):
+            log_callback("[ERROR] Please select a valid Website ZIP file first!\n")
+            update_progress(0, "ZIP Missing!")
+            start_btn.config(state=tk.NORMAL)
+            stop_btn.config(state=tk.DISABLED)
             return
 
-        start_btn.config(state=tk.DISABLED); zip_btn.config(state=tk.DISABLED)
-        log_callback("=== STARTING LOCAL WEB SERVER ===\n\n", clear=True)
-        update_progress(20, "Preparing web assets...")
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        pc_fs_dir = os.path.join(base_dir, "pc_web_fs")
+        shutil.rmtree(pc_fs_dir, ignore_errors=True)
+        os.makedirs(pc_fs_dir, exist_ok=True)
 
-        base_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        log_callback("[PC SERVER] Unpacking assets into temporary webroot...\n")
+        with zipfile.ZipFile(selected_pc_zip, 'r') as z:
+            for member in z.infolist():
+                filename = member.filename
+                parts = filename.split('/', 1)
+                if len(parts) > 1 and parts[1]:
+                    clean_rel_path = parts[1].replace('/', os.sep)
+                    target_path = os.path.join(pc_fs_dir, clean_rel_path)
+                    if member.is_dir(): 
+                        os.makedirs(target_path, exist_ok=True)
+                    else:
+                        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                        with z.open(member) as src, open(target_path, "wb") as tgt:
+                            shutil.copyfileobj(src, tgt)
+
+        os.chdir(pc_fs_dir)
+        handler = CustomHTTPHandler
         
-        # CROSS-PLATFORM FIX: os.path.join verwaltet die Slashes fuer Windows und Linux vollautomatisch!
-        www_pc_dir = os.path.join(base_dir, "pc_web_server_dir")
-        if os.path.exists(www_pc_dir): shutil.rmtree(www_pc_dir)
-        os.makedirs(www_pc_dir, exist_ok=True)
-
-        temp_extract = os.path.join(os.environ.get("TEMP", os.environ.get("TMP", "/tmp")), "pc_web_extracted")
-        if os.path.exists(temp_extract): shutil.rmtree(temp_extract)
-        with zipfile.ZipFile(selected_pc_zip_path, 'r') as zip_ref: zip_ref.extractall(temp_extract)
-
-        extracted_contents = os.listdir(temp_extract)
-        if extracted_contents:
-            src_folder = os.path.join(temp_extract, extracted_contents)
-            if os.path.isdir(src_folder):
-                for item in os.listdir(src_folder):
-                    s = os.path.join(src_folder, item); d = os.path.join(www_pc_dir, item)
-                    shutil.copytree(s, d, dirs_exist_ok=True) if os.path.isdir(s) else shutil.copy2(s, d)
-        shutil.rmtree(temp_extract)
-
-        port = 80
-        local_ip = get_local_ip()
-
-        class MyHandler(SimpleHTTPRequestHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=www_pc_dir, **kwargs)
-            def log_message(self, format, *args):
-                log_callback(f"[SERVER REQUEST] {format%args}\n")
-
-        TCPServer.allow_reuse_address = True
-        httpd = TCPServer(("", port), MyHandler)
-        server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
-        server_thread.start()
-
-        update_progress(100, "Server Active!")
+        socketserver.TCPServer.allow_reuse_address = True
+        server_instance = socketserver.TCPServer(("", 80), handler)
+        
+        local_lan_ip = get_local_ip()
+        
         log_callback("=======================================================\n")
-        log_callback(" SUCCESS! Local Web Server is running on Port 80!\n")
-        log_callback(f" -> Address for your console browser:\n")
-        log_callback(f"    http://{local_ip}\n")
+        log_callback(" 🎉 SUCCESS! PC LOCAL SERVER IS NOW ONLINE ON PORT 80!\n")
+        log_callback(f" -> Target URL for your PS4 Console: http://{local_lan_ip}\n")
         log_callback("=======================================================\n")
-        stop_btn.config(state=tk.NORMAL)
+        update_progress(100, "Server Running")
+        
+        # PROFI-SCHLUSS: Beschreibt das grosse Label unter den Buttons fett und gut lesbar!
+        ip_display_lbl.config(text=f"PS4 URL: http://{local_lan_ip}", fg="#39ff14")
+        
+        server_instance.serve_forever()
     except Exception as e:
-        log_callback(f"\n[SERVER ERROR]: {str(e)}\n")
-        start_btn.config(state=tk.NORMAL); zip_btn.config(state=tk.NORMAL)
+        log_callback(f"[PC SERVER ERROR]: {str(e)}\n")
+        start_btn.config(state=tk.NORMAL)
+        stop_btn.config(state=tk.DISABLED)
+        ip_display_lbl.config(text="SERVER ERROR", fg="#d32f2f")
 
-def stop_pc_server_logic(update_progress, log_callback, start_btn, stop_btn, zip_btn):
-    global httpd
-    try:
-        if httpd:
-            httpd.shutdown(); httpd.server_close(); httpd = None
-        log_callback("\n[SYSTEM] Local Web Server stopped successfully.\n")
-        update_progress(100, "Server stopped.")
-    except Exception as e: log_callback(f"\n[STOP ERROR]: {str(e)}\n")
-    finally: start_btn.config(state=tk.NORMAL); zip_btn.config(state=tk.NORMAL); stop_btn.config(state=tk.DISABLED)
+def start_server_thread(log_callback, update_progress, start_btn, stop_btn, ip_display_lbl):
+    global server_thread
+    start_btn.config(state=tk.DISABLED)
+    stop_btn.config(state=tk.NORMAL)
+    ip_display_lbl.config(text="STARTING SERVER...", fg="#ff8f00")
+    log_callback("=== INITIATING LOCAL HTTP SERVER ON PORT 80 ===\n", clear=True)
+    update_progress(30, "Detecting network interface...")
+    
+    # Uebergibt das Label an den asynchronen Hintergrund-Thread
+    server_thread = threading.Thread(target=run_server_logic, args=(log_callback, update_progress, start_btn, stop_btn, ip_display_lbl), daemon=True)
+    server_thread.start()
+
+def stop_server_logic(log_callback, update_progress, start_btn, stop_btn, ip_display_lbl):
+    global server_instance
+    log_callback("\n[PC SERVER] Shutting down HTTP engine and clearing ports...\n")
+    if server_instance:
+        server_instance.shutdown()
+        server_instance.server_close()
+    
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    shutil.rmtree(os.path.join(base_dir, "pc_web_fs"), ignore_errors=True)
+    
+    start_btn.config(state=tk.NORMAL)
+    stop_btn.config(state=tk.DISABLED)
+    
+    # Setzt das Label im Hauptmenue spiegelblank zurueck
+    ip_display_lbl.config(text="SERVER OFFLINE", fg="gray")
+    update_progress(0, "Server Stopped")
+    log_callback("[PC SERVER] HTTP Server offline successfully.\n")
