@@ -1,4 +1,4 @@
-﻿===========================================================
+===========================================================
  Universal Offline Deployment Suite - README & LEGAL NOTICE
 ===========================================================
 
@@ -10,13 +10,21 @@
    network so that the console can remain 100% offline securely. The user must 
    provide their own source archive (.zip) containing the web assets.
 
-2. DISCLAIMER / NO LIABILITY:
+2. SUPPORTED HARDWARE / CHIPSETS:
+   The USB Flasher module features automatic architecture detection and supports:
+   - ESP8266 / ESP8266EX (NodeMCU V2, Wemos D1 Mini, ESP-01S)
+   - ESP32 (Classic WROOM-32, NodeMCU-32S, DevKitC)
+   - ESP32-S2 (Saola, Lolin S2 Mini - Highly Recommended)
+   - ESP32-S3 (DevKitC-1, Lolin S3 Mini)
+   - ESP32-C3 (DevKitM-1, Lolin C3 Mini)
+
+3. DISCLAIMER / NO LIABILITY:
    This software is provided "as-is", without warranty of any kind. The developer 
    assumes absolutely no responsibility or liability for any potential damages, 
    data loss, or crashes on your console or computer system. Use at your own risk.
    There is no affiliation, partnership, or connection to any external exploit developers.
 
-3. LICENSE:
+4. LICENSE:
    This project is public domain. Feel free to use, modify, expand, and redistribute 
    the source code as you wish. No strings attached.
 
@@ -30,14 +38,22 @@
    zu hosten, damit die Konsole zu 100% offline bleiben kann. Der Anwender muss sein 
    eigenes Quell-Archiv (.zip) mit den Web-Assets mitbringen.
 
-2. HAFTUNGSAUSSCHLUSS:
+2. UNTERSTUETZTE HARDWARE / CHIPSÄTZE:
+   Das Hardware-Modul erkennt angeschlossene Boards automatisch und unterstuetzt:
+   - ESP8266 / ESP8266EX (NodeMCU V2, Wemos D1 Mini, ESP-01S)
+   - ESP32 (Klassisch WROOM-32, NodeMCU-32S, DevKitC)
+   - ESP32-S2 (Saola, Lolin S2 Mini - Drringend Empfohlen)
+   - ESP32-S3 (DevKitC-1, Lolin S3 Mini)
+   - ESP32-C3 (DevKitM-1, Lolin C3 Mini)
+
+3. HAFTUNGSAUSSCHLUSS:
    Diese Software wird ohne Maengelgewaehr zur Verfuegung gestellt. Der Entwickler 
    uebernimmt absolut keine Haftung oder Verantwortung fuer eventuelle Schaeden, 
    Systemabstuerze oder Datenverlust an deiner Konsole oder deinem Computer! 
    Die Nutzung erfolgt vollstaendig auf eigene Gefahr. Es besteht keinerlei Verbindung 
    zu externen Exploit-Entwicklern oder Teams.
 
-3. LIZENZ:
+4. LIZENZ:
    Dieses Projekt ist gemeinfrei (Public Domain). Du kannst die Skripte nach Belieben 
    veraendern, erweitern und teilen!
 ===========================================================
