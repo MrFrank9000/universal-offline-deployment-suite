@@ -62,7 +62,7 @@ def change_language(event=None):
     root.update_idletasks()
 
 root = tk.Tk()
-root.title("Universal Offline Deployment Suite (v0.0.2-Test)")
+root.title("Universal Offline Deployment Suite (v0.0.3-Test)")
 root.geometry("830x780")
 root.configure(bg="#121216")
 root.resizable(False, False)
@@ -75,7 +75,7 @@ lang_combo.set("DE")
 lang_combo.pack(side=tk.LEFT)
 lang_combo.bind("<<ComboboxSelected>>", change_language)
 
-title_label = tk.Label(root, text="UNIVERSAL OFFLINE DEPLOYMENT SUITE (v0.0.2-Test)", fg="#0080ff", bg="#121216", font=("Segoe UI", 14, "bold"))
+title_label = tk.Label(root, text="UNIVERSAL OFFLINE DEPLOYMENT SUITE (v0.0.3-Test)", fg="#0080ff", bg="#121216", font=("Segoe UI", 14, "bold"))
 title_label.pack(pady=10)
 
 notebook = ttk.Notebook(root)
