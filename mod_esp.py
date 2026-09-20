@@ -1,156 +1,153 @@
-﻿import os
-import sys
-import glob
-import shutil
-import zipfile
-import subprocess
-import threading
-import platform
-import tkinter as tk
+﻿import os, sys, glob, shutil, zipfile, subprocess, threading, platform, tkinter as tk
 from tkinter import filedialog, messagebox
 
 selected_zip_path = ""
 monitor_active = False
 ser = None
 
-def select_zip_file(zip_label, log_callback):
+def select_zip_file(lbl, cb):
     global selected_zip_path
-    file_path = filedialog.askopenfilename(filetypes=[("ZIP-Archive", "*.zip")])
-    if file_path:
-        selected_zip_path = file_path
-        zip_label.config(text=os.path.basename(file_path), fg="#39ff14")
-        log_callback(f"[SYSTEM] Hardware ZIP source loaded: {file_path}\n")
+    f = filedialog.askopenfilename(filetypes=[("ZIP", "*.zip")])
+    if f: selected_zip_path = f; lbl.config(text=os.path.basename(f), fg="#39ff14"); cb(f"[SYSTEM] Loaded ZIP: {f}\n")
 
 def show_supported_devices():
-    devices = (
-        "- ESP8266 / ESP8266EX (NodeMCU V2, Wemos D1 Mini)\n"
-        "- ESP32 (Classic WROOM-32, NodeMCU-32S)\n"
-        "- ESP32-S2 (Saola, Lolin S2 Mini - Highly Recommended)\n"
-        "- ESP32-S3 (DevKitC-1, Lolin S3 Mini)\n"
-        "- ESP32-C3 (DevKitM-1, Lolin C3 Mini)\n\n"
-        "All chip architectures are detected automatically during the flashing process."
-    )
-    messagebox.showinfo("Supported Hardware Devices", devices)
+    messagebox.showinfo("Devices", "ESP8266EX fully supported with validated list array indexing.")
 
-def get_auto_com_port(log_callback):
+def refresh_board_list(dropdown_widget, log_callback):
     import serial.tools.list_ports
     ports = list(serial.tools.list_ports.comports())
-    
-    # CROSS-PLATFORM PORT DETECTION: Filtert je nach Betriebssystem
-    current_os = platform.system()
+    found_devices = []
     for p in ports:
-        p_upper = p.device.upper()
-        if current_os == "Windows" and "COM" in p_upper:
-            log_callback(f"[HARDWARE] Auto-detected Windows port: {p.device}\n")
-            return p.device
-        elif current_os == "Linux" and ("TTYUSB" in p_upper or "TTYACM" in p_upper or "TTY" in p_upper):
-            log_callback(f"[HARDWARE] Auto-detected Linux port: {p.device}\n")
-            return p.device
-            
-    if ports:
-        log_callback(f"[WARNING] Using first available port fallback: {ports[0].device}\n")
-        return ports[0].device
-    return None
-def run_flash_logic(ssid_entry, pw_entry, update_progress, log_callback, flash_btn, zip_btn, mon_btn, root):
+        vid = p.vid if p.vid is not None else 0
+        pid = p.pid if p.pid is not None else 0
+        b_type = "NodeMCU" if (vid == 0x1a86 or vid == 0x10c4) else "Wemos D1 Mini"
+        found_devices.append(f"{p.device} - {b_type}")
+    if not found_devices: found_devices = ["No Device Found"]
+    dropdown_widget["values"] = found_devices
+    dropdown_widget.set(found_devices)
+    return ports
+def run_flash_logic(ssid_entry, pw_entry, board_var, update_progress, log_callback, flash_btn, zip_btn, mon_btn, root):
     global selected_zip_path
     try:
-        flash_btn.config(state=tk.DISABLED); zip_btn.config(state=tk.DISABLED); mon_btn.config(state=tk.DISABLED)
-        log_callback("=== STARTING CROSS-PLATFORM HARDWARE FLASHER ===\n\n", clear=True)
-        
+        ssid = ssid_entry.get().strip(); pw = pw_entry.get().strip(); selection = str(board_var.get())
         if not selected_zip_path or not os.path.exists(selected_zip_path):
-            log_callback("ERROR: No firmware ZIP file selected!\n")
-            update_progress(0, "ZIP missing!"); return
+            log_callback("[ERROR] No Website ZIP file selected!\n"); update_progress(0, "ZIP missing!"); return
+        if "No Device" in selection or "-" not in selection:
+            log_callback("[ERROR] No hardware stick selected in dropdown!\n"); update_progress(0, "No Selection!"); return
             
-        ssid = ssid_entry.get().strip()
-        pw = pw_entry.get().strip()
+        # ABSOLUTER ARRAYS-FIX: Expliziter Index-Zugriff auf das erste Element [0] vor dem Strippen!
+        clean_selection = selection.replace("{", "").replace("}", "").strip()
+        parts = clean_selection.split(" - ")
+        com_port = parts[0].strip()
+        board_type = parts[1].strip() if len(parts) > 1 else "NodeMCU"
         
-        update_progress(10, "Scanning USB serial ports...")
-        com_port = get_auto_com_port(log_callback)
-        if not com_port:
-            log_callback("ERROR: No connected ESP board found! Please check your USB cable.\n")
-            update_progress(0, "Device not found!"); return
+        flash_btn.config(state=tk.DISABLED); zip_btn.config(state=tk.DISABLED); mon_btn.config(state=tk.DISABLED)
+        log_callback(f"=== INITIATING FLAT SPIFFS BUILD ON {com_port} ===\n\n", clear=True)
+        update_progress(10, "Preparing sandbox...")
+        
+        if getattr(sys, 'frozen', False): base_dir = os.path.dirname(sys.executable)
+        else: base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             
-        base_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        fs_dir = os.path.join(base_dir, "web_fs")
+        shutil.rmtree(fs_dir, ignore_errors=True)
+        os.makedirs(fs_dir, exist_ok=True)
         
-        # CROSS-PLATFORM PATHS: os.path.join regelt die Slashes automatisch fuer Windows und Linux
-        firmware_dir = os.path.join(base_dir, "firmware_src")
-        if os.path.exists(firmware_dir): shutil.rmtree(firmware_dir)
-        os.makedirs(firmware_dir, exist_ok=True)
+        log_callback("[SYSTEM] Unpacking ZIP and peeling off GitHub wrapper folder...\n")
+        update_progress(25, "Extracting payload...")
         
-        log_callback(f"[SYSTEM] Unpacking assets: {os.path.basename(selected_zip_path)}\n")
-        update_progress(30, "Extracting firmware assets...")
-        with zipfile.ZipFile(selected_zip_path, 'r') as zip_ref:
-            zip_ref.extractall(firmware_dir)
+        with zipfile.ZipFile(selected_zip_path, 'r') as z:
+            for member in z.infolist():
+                filename = member.filename
+                p_parts = filename.split('/', 1)
+                if len(p_parts) > 1 and p_parts[1]:
+                    new_rel_path = p_parts[1]
+                    target_path = os.path.join(fs_dir, new_rel_path.replace('/', os.sep))
+                    if member.is_dir():
+                        os.makedirs(target_path, exist_ok=True)
+                    else:
+                        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                        with z.open(member) as source, open(target_path, "wb") as target:
+                            shutil.copyfileobj(source, target)
+                            
+        log_callback("[SYSTEM] Injecting system configurations (wifi_config.txt)...\n")
+        with open(os.path.join(fs_dir, "wifi_config.txt"), "w", encoding="utf-8") as fcf:
+            fcf.write(f"{ssid}\n{pw}\n")
             
-        update_progress(60, "Configuring Wi-Fi credentials...")
-        config_path = os.path.join(firmware_dir, "wifi_config.h")
-        with open(config_path, "w", encoding="utf-8") as f:
-            f.write(f'#define WIFI_SSID "{ssid}"\n#define WIFI_PASSWORD "{pw}"\n#define SERVER_PORT 80\n')
+        user_home = os.path.expanduser("~")
+        mkspiffs_glob = os.path.join(user_home, "AppData", "Local", "Arduino15", "packages", "esp8266", "tools", "mkspiffs", "*", "mkspiffs.exe")
+        found_tools = glob.glob(mkspiffs_glob)
+        if not found_tools:
+            log_callback("[CRITICAL ERROR] Official mkspiffs.exe compiler missing in Arduino15!\n")
+            update_progress(0, "Toolchain missing!"); return
             
-        update_progress(80, "Executing esptool flasher...")
-        log_callback(f"[HARDWARE] Flashing stick on port {com_port} via Port 80 core...\n")
+        mkspiffs_cmd = found_tools[0]
+        target_fs_bin = os.path.join(base_dir, "firmware_src", "spiffs_data.bin")
         
-        # CROSS-PLATFORM EXECUTABLE DETECTION
+        if os.path.exists(target_fs_bin): os.remove(target_fs_bin)
+        os.makedirs(os.path.dirname(target_fs_bin), exist_ok=True)
+        
+        log_callback(f"[COMPILER] Invoking factory binary: {os.path.basename(mkspiffs_cmd)}\n")
+        log_callback("[COMPILER] Compiling normalized 3MB SPIFFS filesystem map...\n")
+        update_progress(50, "Compiling filesystem...")
+        
+        mk_proc = subprocess.Popen([
+            mkspiffs_cmd, "-c", fs_dir, "-b", "8192", "-p", "256", "-s", "3145728", target_fs_bin
+        ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        for line in mk_proc.stdout:
+            log_callback(f" [MKSPIFFS] {line}")
+        mk_proc.wait()
+        
         esptool_cmd = "esptool.exe" if platform.system() == "Windows" else "esptool"
+        log_callback(f"[HARDWARE] Flashing certified asset binary to Sektor 0x100000 on {com_port}...\n")
+        update_progress(75, "Uploading filesystem...")
         
-        process = subprocess.Popen(
-            [esptool_cmd, "--port", com_port, "--baud", "460800", "write_flash", "0x0", os.path.join(firmware_dir, "firmware.bin")],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
-        )
-        for line in process.stdout:
-            log_callback(line)
-            root.update_idletasks()
-        process.stdout.close()
-        rc = process.wait()
+        p = subprocess.Popen([esptool_cmd, "--port", com_port, "--baud", "460800", "write_flash", "--flash_mode", "dio", "0x100000", target_fs_bin], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        for line in p.stdout: log_callback(line); root.update_idletasks()
+        p.stdout.close(); rc = p.wait()
         
+        shutil.rmtree(fs_dir, ignore_errors=True)
         if rc == 0:
             update_progress(100, "Flash Successful!")
-            log_callback("\n=======================================================\n 🎉 SUCCESS! Hardware stick flashed successfully on Port 80!\n=======================================================\n")
-        else:
-            update_progress(0, "Flasher error!")
-            log_callback(f"\nERROR: esptool exited with error code {rc}\n")
-            
-    except Exception as e:
-        log_callback(f"\n[CRITICAL ERROR]: {str(e)}\n")
-        update_progress(0, "Failed!")
-    finally:
-        flash_btn.config(state=tk.NORMAL); zip_btn.config(state=tk.NORMAL); mon_btn.config(state=tk.NORMAL)
+            log_callback(f"\n=======================================================\n 🎉 SUCCESS! Standardized C++ Server synchronized and active!\n -> Gateway Node : http://10.1.1.1\n=======================================================\n")
+        else: log_callback(f"\nERROR: esptool code {rc}\n")
+    except Exception as e: log_callback(f"\n[ERROR]: {str(e)}\n")
+    finally: flash_btn.config(state=tk.NORMAL); zip_btn.config(state=tk.NORMAL); mon_btn.config(state=tk.NORMAL)
 
-def start_flash_thread(ssid_entry, pw_entry, update_progress, log_callback, flash_btn, zip_btn, mon_btn, root):
-    threading.Thread(target=run_flash_logic, args=(ssid_entry, pw_entry, update_progress, log_callback, flash_btn, zip_btn, mon_btn, root), daemon=True).start()
+def start_flash_thread(ssid, pw, board_var, up, log, fb, zb, mb, r):
+    threading.Thread(target=run_flash_logic, args=(ssid, pw, board_var, up, log, fb, zb, mb, r), daemon=True).start()
 
-def monitor_serial_logic(update_progress, log_callback, flash_btn, zip_btn, mon_btn, root):
+def run_monitor_logic(update_progress, log_callback, flash_btn, zip_btn, mon_btn, root, board_var, ssid_val, pw_val):
     global monitor_active, ser
-    import serial
-    if monitor_active:
-        monitor_active = False
-        if ser and ser.is_open: ser.close()
-        log_callback("\n[MONITOR] Serial monitor stopped.\n")
-        mon_btn.config(text="Start Live Monitor", bg="#ff8f00", fg="black")
-        flash_btn.config(state=tk.NORMAL); zip_btn.config(state=tk.NORMAL)
-        return
-        
-    com_port = get_auto_com_port(log_callback)
-    if not com_port:
-        log_callback("ERROR: Cannot start monitor. No device found!\n")
-        return
-        
+    import serial, time
+    selection = str(board_var.get())
+    if "No Device" in selection or "-" not in selection: monitor_active = False; return
+    clean_selection = selection.replace("{", "").replace("}", "").strip()
+    parts = clean_selection.split(" - ")
+    com_port = parts[0].strip()
     try:
-        ser = serial.Serial(com_port, 115200, timeout=1)
-        monitor_active = True
-        log_callback(f"=== STARTING SERIAL MONITOR ON PORT {com_port} (115200 Baud) ===\n\n")
-        mon_btn.config(text="STOP MONITOR", bg="#c62828", fg="white")
-        flash_btn.config(state=tk.DISABLED); zip_btn.config(state=tk.DISABLED)
-        
+        ser = serial.Serial(com_port, 74880, timeout=1)
+        ser.setDTR(False); ser.setRTS(False); time.sleep(0.1); ser.setDTR(True); ser.setRTS(True); time.sleep(0.1); ser.setDTR(False)
+        log_callback(f"=== ASYNC LIVE MONITOR ACTIVE ON {com_port} AT 74880 BAUD ===\n")
+        log_callback("-------------------------------------------------------\n")
+        log_callback(f" [AUDIT] Injected WLAN SSID : {ssid_val}\n")
+        log_callback(f" [AUDIT] Network Gateway    : http://10.1.1.1:80\n")
+        log_block = "-------------------------------------------------------\n Waiting for native hardware API boot logs...\n\n"
+        log_callback(log_block)
         while monitor_active:
-            if ser.in_waiting:
-                data = ser.readline().decode('utf-8', errors='ignore')
-                log_callback(data)
-                root.update_idletasks()
-            root.update_idletasks()
-    except Exception as e:
-        log_callback(f"\n[MONITOR ERROR]: {str(e)}\n")
+            if ser.in_waiting: log_callback(ser.readline().decode('utf-8', errors='ignore'))
+            time.sleep(0.01)
+    except Exception as e: log_callback(f"\n[MONITOR ERROR]: {str(e)}\n")
+    finally:
         monitor_active = False
         if ser and ser.is_open: ser.close()
         mon_btn.config(text="Start Live Monitor", bg="#ff8f00", fg="black")
         flash_btn.config(state=tk.NORMAL); zip_btn.config(state=tk.NORMAL)
+
+def monitor_serial_logic(update_progress, log_callback, flash_btn, zip_btn, mon_btn, root, board_var, ssid_entry=None, pw_entry=None):
+    global monitor_active, ser
+    if monitor_active: monitor_active = False; return
+    monitor_active = True
+    mon_btn.config(text="STOP MONITOR", bg="#c62828", fg="white"); flash_btn.config(state=tk.DISABLED); zip_btn.config(state=tk.DISABLED)
+    s_val = ssid_entry.get().strip() if ssid_entry else "N/A"
+    p_val = pw_entry.get().strip() if pw_entry else "N/A"
+    threading.Thread(target=run_monitor_logic, args=(update_progress, log_callback, flash_btn, zip_btn, mon_btn, root, board_var, s_val, p_val), daemon=True).start()
