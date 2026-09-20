@@ -1,0 +1,50 @@
+﻿# Multi-Language Translation Database - Open Source Public Domain
+
+translations = {
+    "DE": {
+        "title": "UNIVERSAL OFFLINE DEPLOYMENT SUITE",
+        "tab_welcome": " [Welcome] Uebersicht ",
+        "tab_apk": " [APK] Android App ",
+        "tab_esp": " [ESP8266/ESP32] Hardware Stick ",
+        "tab_pc": " [PC] Lokaler Server ",
+        "dash_title": "Universal Offline Web Deployment Station",
+        "dash_guide": "Dieses Werkzeug erlaubt es dir, Web-Assets und Offline-Server fuer deine Konsole bereitzustellen.\nWaehle oben den passenden Reiter fuer dein Zielgeraet aus:\n\n1. [APK] Android App:\n   Kompiliere eine eigenstaendige Server-App direkt fuer dein Smartphone.\n\n2. [ESP8266/ESP32] Hardware Stick:\n   Brenne einen verschluesselten WLAN-Hotspot auf einen USB-Dongle.\n\n3. [PC] Lokaler Server:\n   Starte einen HTTP-Webserver auf deinem PC, um Dateien via Netzwerk zu streamen.\n\nAnforderungen:\n-> Halte dein Quell-Archiv ('*.zip') im selben Ordner bereit.\n-> Verfolge den Fortschritt live im Konsolen-Log unten.\n\n=======================================================\n HAFTUNGSAUSSCHLUSS & LIZENZ:\n=======================================================\n- WICHTIG: Dieses Programm enthaelt keinerlei Exploits, Payloads oder Jailbreak-Dateien!\n- Es ist ein reines, leeres Server-Werkzeug, um vom Nutzer bereitgestellte Web-Dateien\n  komfortabel im privaten Heimnetzwerk zu hosten, damit die Konsole zu 100% offline bleibt.\n- Es besteht keinerlei Verbindung zu externen Exploit-Entwicklern oder Teams.\n- Es wird keinerlei Haftung fuer eventuelle Schaeden oder Datenverlust uebernommen!\n- Die Nutzung dieses Programms erfolgt vollstaendig auf eigene Gefahr.\n- Dieses Projekt ist Public Domain. Jeder darf den Code frei veraendern und teilen.",
+        "apk_info": "Kompiliere eine Android-Web-Loader-App fuer dein Smartphone.\nWaehle dazu deine Quell-ZIP aus. Das Skelett wird vollautomatisch verwaltet.",
+        "esp_info": "Konfiguriere den WLAN-Hotspot des USB-Sticks und injiziere deine Quell-ZIP.\nDer COM-Port und die Server-IP werden vollautomatisch verwaltet.",
+        "pc_info": "Hoste deine Web-Dateien direkt von deiner Windows-Netzwerkkarte.\nWaehle die ZIP, starte den Server und tippe die angezeigte IP im Konsolen-Browser ein.",
+        "btn_load_zip": "[OPEN] Quell-ZIP laden",
+        "zip_missing": "Keine ZIP ausgewaehlt (Zwingend erforderlich!)",
+        "btn_start_apk": "[START] Android APK generieren",
+        "btn_flash_esp": "[FLASH] Firmware brennen",
+        "btn_start_pc": "[START] PC-Webserver aktivieren",
+        "btn_stop_pc": "[STOP] Server beenden",
+        "status_ready": "Bereit fuer Action. Universal Suite initialisiert.",
+        "lbl_ssid": "WLAN-Name (SSID):",
+        "lbl_pw": "WLAN-Passwort:",
+        "btn_info_esp": "[INFO] Unterstuetzte Boards",
+        "btn_mon_esp": "[MONITOR] Live-Monitor starten"
+    },
+    "EN": {
+        "title": "UNIVERSAL OFFLINE DEPLOYMENT SUITE",
+        "tab_welcome": " [Welcome] Overview ",
+        "tab_apk": " [APK] Android App ",
+        "tab_esp": " [ESP8266/ESP32] Hardware Stick ",
+        "tab_pc": " [PC] Local Web Server ",
+        "dash_title": "Universal Offline Web Deployment Station",
+        "dash_guide": "This tool allows you to deploy and host local web assets and offline servers for your console.\nChoose one of the specialized tabs above depending on your target device:\n\n1. [APK] Android App:\n   Compiles a standalone offline server application directly onto your Android smartphone.\n\n2. [ESP8266/ESP32] Hardware Stick:\n   Flashes a secure, password-protected Wi-Fi hotspot onto a small USB hardware dongle.\n\n3. [PC] Local Web Server:\n   Starts an immediate local HTTP server on your network adapter to stream payloads via LAN/Wi-Fi.\n\nRequirements:\n-> Make sure your source exploit archive ('*.zip') is ready in the directory.\n-> Keep an eye on the green live console log below for progress tracking.\n\n=======================================================\n DISCLAIMER & LICENSE:\n=======================================================\n- IMPORTANT: This application does NOT contain any exploits, payloads, or jailbreak files!\n- It is a completely blank server utility designed to host user-provided web assets\n  within a private local network environment to ensure the console stays 100% offline.\n- This project is entirely independent and has no affiliation with any exploit developers.\n- The software is provided as-is, assuming absolutely no liability for potential damages!\n- Using this software is completely at your own risk.\n- This project is public domain. Feel free to modify, expand, and redistribute as you wish!",
+        "apk_info": "Compile a standalone Android web loader application for your smartphone.\nSelect your source ZIP file. The underlying environment is managed automatically.",
+        "esp_info": "Configure the Wi-Fi hotspot of the USB stick and inject your source ZIP.\nThe COM port and the server IP are managed fully automatically.",
+        "pc_info": "Host your web assets directly from your Windows network card.\nSelect your ZIP, start the server and enter the displayed IP in your console browser.",
+        "btn_load_zip": "[OPEN] Load Source ZIP Archive",
+        "zip_missing": "No ZIP selected (Required!)",
+        "btn_start_apk": "[START] Generate Android APK",
+        "btn_flash_esp": "[FLASH] Burn Firmware",
+        "btn_start_pc": "[START] Activate PC Web Server",
+        "btn_stop_pc": "[STOP] Terminate Server",
+        "status_ready": "Ready for action. Universal Suite initialized.",
+        "lbl_ssid": "Wi-Fi Name (SSID):",
+        "lbl_pw": "Wi-Fi Password:",
+        "btn_info_esp": "[INFO] Supported Devices",
+        "btn_mon_esp": "[MONITOR] Start Live Monitor"
+    }
+}
