@@ -10,9 +10,9 @@
    network so that the console can remain 100% offline securely. The user must 
    provide their own source archive (.zip) containing the web assets.
 
-2. SUPPORTED HARDWARE & MODULE STATUS (v0.0.2-Test):
-   - [PC SERVER] Local Server Module: fully functional.
-   - [USB FLASH] Hardware Stick Flasher: fully functional with auto architecture scan.
+2. SUPPORTED HARDWARE & MODULE STATUS (v0.0.3-Test):
+   - [PC SERVER] Local Server Module: fully functional on standard Port 80.
+   - [USB FLASH] Hardware Stick Flasher: fully functional on Port 80 with auto scan.
      Supports: ESP8266, ESP8266EX, ESP32, ESP32-S2, ESP32-S3, ESP32-C3.
    - [APK BUILD] Android App Module: CURRENTLY PAUSED / UNDER CONSTRUCTION.
      This feature is temporarily disabled in this build for technical optimization.
@@ -37,9 +37,9 @@
    zu hosten, damit die Konsole zu 100% offline bleiben kann. Der Anwender muss sein 
    eigenes Quell-Archiv (.zip) mit den Web-Assets mitbringen.
 
-2. UNTERSTUETZTE HARDWARE & MODUL-STATUS (v0.0.2-Test):
-   - [PC SERVER] Lokaler Server-Reiter: Voll einsatzbereit.
-   - [USB FLASH] Hardware Stick Flasher: Voll einsatzbereit mit Auto-Chip-Erkennung.
+2. UNTERSTUETZTE HARDWARE & MODUL-STATUS (v0.0.3-Test):
+   - [PC SERVER] Lokaler Server-Reiter: Voll einsatzbereit auf Port 80.
+   - [USB FLASH] Hardware Stick Flasher: Voll einsatzbereit auf Port 80 mit Auto-Erkennung.
      Unterstuetzt: ESP8266, ESP8266EX, ESP32, ESP32-S2, ESP32-S3, ESP32-C3.
    - [APK BUILD] Android App-Reiter: AKTUELL PAUSIERT / IN ARBEIT.
      Dieses Feature ist in dieser Testversion fuer Optimierungen temporaer deaktiviert.
