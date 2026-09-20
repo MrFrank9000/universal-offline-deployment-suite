@@ -2,7 +2,7 @@
 
 translations = {
     "DE": {
-        "title": "UNIVERSAL OFFLINE DEPLOYMENT SUITE",
+        "title": "UNIVERSAL OFFLINE DEPLOYMENT SUITE (v0.0.2-Test)",
         "tab_welcome": " [Welcome] Uebersicht ",
         "tab_apk": " [APK] Android App ",
         "tab_esp": " [ESP8266/ESP32] Hardware Stick ",
@@ -14,7 +14,7 @@ translations = {
         "pc_info": "Hoste deine Web-Dateien direkt von deiner Windows-Netzwerkkarte.\nWaehle die ZIP, starte den Server und tippe die angezeigte IP im Konsolen-Browser ein.",
         "btn_load_zip": "[OPEN] Quell-ZIP laden",
         "zip_missing": "Keine ZIP ausgewaehlt (Zwingend erforderlich!)",
-        "btn_start_apk": "[START] Android APK generieren",
+        "btn_start_apk": "[APK BUILD INAKTIV]",
         "btn_flash_esp": "[FLASH] Firmware brennen",
         "btn_start_pc": "[START] PC-Webserver aktivieren",
         "btn_stop_pc": "[STOP] Server beenden",
@@ -22,10 +22,11 @@ translations = {
         "lbl_ssid": "WLAN-Name (SSID):",
         "lbl_pw": "WLAN-Passwort:",
         "btn_info_esp": "[INFO] Unterstuetzte Boards",
-        "btn_mon_esp": "[MONITOR] Live-Monitor starten"
+        "btn_mon_esp": "[MONITOR] Live-Monitor starten",
+        "apk_maintenance": "Achtung: Dieses Feature ist aktuell in Arbeit und in Version v0.0.2-Test inaktiv."
     },
     "EN": {
-        "title": "UNIVERSAL OFFLINE DEPLOYMENT SUITE",
+        "title": "UNIVERSAL OFFLINE DEPLOYMENT SUITE (v0.0.2-Test)",
         "tab_welcome": " [Welcome] Overview ",
         "tab_apk": " [APK] Android App ",
         "tab_esp": " [ESP8266/ESP32] Hardware Stick ",
@@ -37,7 +38,7 @@ translations = {
         "pc_info": "Host your web assets directly from your Windows network card.\nSelect your ZIP, start the server and enter the displayed IP in your console browser.",
         "btn_load_zip": "[OPEN] Load Source ZIP Archive",
         "zip_missing": "No ZIP selected (Required!)",
-        "btn_start_apk": "[START] Generate Android APK",
+        "btn_start_apk": "[APK BUILD INACTIVE]",
         "btn_flash_esp": "[FLASH] Burn Firmware",
         "btn_start_pc": "[START] Activate PC Web Server",
         "btn_stop_pc": "[STOP] Terminate Server",
@@ -45,6 +46,7 @@ translations = {
         "lbl_ssid": "Wi-Fi Name (SSID):",
         "lbl_pw": "Wi-Fi Password:",
         "btn_info_esp": "[INFO] Supported Devices",
-        "btn_mon_esp": "[MONITOR] Start Live Monitor"
+        "btn_mon_esp": "[MONITOR] Start Live Monitor",
+        "apk_maintenance": "Notice: This feature is currently under construction and inactive in build v0.0.2-Test."
     }
 }

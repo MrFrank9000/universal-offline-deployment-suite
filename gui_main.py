@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import tkinter as tk
 from tkinter import ttk
@@ -47,6 +47,7 @@ def change_language(event=None):
         pc_zip_label.config(text=db["zip_missing"])
         
     apk_btn.config(text=db["btn_start_apk"])
+    apk_m_lbl.config(text=db["apk_maintenance"])
     flash_btn.config(text=db["btn_flash_esp"])
     server_start_btn.config(text=db["btn_start_pc"])
     server_stop_btn.config(text=db["btn_stop_pc"])
@@ -61,7 +62,7 @@ def change_language(event=None):
     root.update_idletasks()
 
 root = tk.Tk()
-root.title("Universal Offline Deployment Suite")
+root.title("Universal Offline Deployment Suite (v0.0.2-Test)")
 root.geometry("830x780")
 root.configure(bg="#121216")
 root.resizable(False, False)
@@ -74,7 +75,7 @@ lang_combo.set("DE")
 lang_combo.pack(side=tk.LEFT)
 lang_combo.bind("<<ComboboxSelected>>", change_language)
 
-title_label = tk.Label(root, text="UNIVERSAL OFFLINE DEPLOYMENT SUITE", fg="#0080ff", bg="#121216", font=("Segoe UI", 14, "bold"))
+title_label = tk.Label(root, text="UNIVERSAL OFFLINE DEPLOYMENT SUITE (v0.0.2-Test)", fg="#0080ff", bg="#121216", font=("Segoe UI", 14, "bold"))
 title_label.pack(pady=10)
 
 notebook = ttk.Notebook(root)
@@ -101,12 +102,15 @@ apk_info = tk.Label(tab_apk, text="Placeholder", fg="#ffffff", bg="#161620", fon
 apk_info.pack(anchor=tk.W, pady=10)
 apk_zip_frame = tk.Frame(tab_apk, bg="#161620")
 apk_zip_frame.pack(pady=10, anchor=tk.W)
-apk_zip_btn = tk.Button(apk_zip_frame, text="Placeholder", command=lambda: mod_apk.select_apk_zip_file(apk_zip_label, log_message), bg="#21212d", fg="white", font=("Segoe UI", 9, "bold"), padx=10, pady=5, relief=tk.FLAT)
+apk_zip_btn = tk.Button(apk_zip_frame, text="Placeholder", state=tk.DISABLED, bg="#21212d", fg="#888888", font=("Segoe UI", 9, "bold"), padx=10, pady=5, relief=tk.FLAT)
 apk_zip_btn.pack(side=tk.LEFT)
-apk_zip_label = tk.Label(apk_zip_frame, text="Keine ZIP ausgewaehlt (Zwingend erforderlich!)", fg="#ff3333", bg="#161620", font=("Segoe UI", 9, "italic"))
+apk_zip_label = tk.Label(apk_zip_frame, text="Inaktiv", fg="#888888", bg="#161620", font=("Segoe UI", 9, "italic"))
 apk_zip_label.pack(side=tk.LEFT, padx=10)
-apk_btn = tk.Button(tab_apk, text="Placeholder", command=lambda: mod_apk.start_apk_thread(update_progress, log_message, apk_btn, apk_zip_btn, root), bg="#00439c", fg="white", font=("Segoe UI", 11, "bold"), padx=30, pady=12, relief=tk.FLAT)
-apk_btn.pack(pady=20)
+
+apk_btn = tk.Button(tab_apk, text="Placeholder", state=tk.DISABLED, bg="#21212d", fg="#888888", font=("Segoe UI", 11, "bold"), padx=30, pady=12, relief=tk.FLAT)
+apk_btn.pack(pady=(20, 5))
+apk_m_lbl = tk.Label(tab_apk, text="Placeholder", fg="#ff8f00", bg="#161620", font=("Segoe UI", 10, "italic"))
+apk_m_lbl.pack(pady=5)
 # TAB 2: HARDWARE STICK FLASHER
 tab_esp = tk.Frame(notebook, bg="#161620", padx=20, pady=10)
 notebook.add(tab_esp, text=" Placeholder ")
@@ -133,7 +137,7 @@ zip_frame = tk.Frame(tab_esp, bg="#161620")
 zip_frame.pack(pady=5, anchor=tk.W)
 zip_btn = tk.Button(zip_frame, text="Placeholder", command=lambda: mod_esp.select_zip_file(zip_label, log_message), bg="#21212d", fg="white", font=("Segoe UI", 9, "bold"), padx=10, pady=5, relief=tk.FLAT)
 zip_btn.pack(side=tk.LEFT)
-zip_label = tk.Label(zip_frame, text="Keine ZIP ausgewaehlt (Zwingend erforderlich!)", fg="#ff3333", bg="#161620", font=("Segoe UI", 9, "italic"))
+zip_label = tk.Label(zip_frame, text="Keine ZIP ausgewaehlt", fg="#ff3333", bg="#161620", font=("Segoe UI", 9, "italic"))
 zip_label.pack(side=tk.LEFT, padx=10)
 
 act_frame = tk.Frame(tab_esp, bg="#161620")
@@ -152,7 +156,7 @@ pc_zip_frame = tk.Frame(tab_pc, bg="#161620")
 pc_zip_frame.pack(pady=5, anchor=tk.W)
 pc_zip_btn = tk.Button(pc_zip_frame, text="Placeholder", command=lambda: mod_pc.select_pc_zip_file(pc_zip_label, log_message), bg="#21212d", fg="white", font=("Segoe UI", 9, "bold"), padx=10, pady=5, relief=tk.FLAT)
 pc_zip_btn.pack(side=tk.LEFT)
-pc_zip_label = tk.Label(pc_zip_frame, text="Keine ZIP ausgewaehlt (Zwingend erforderlich!)", fg="#ff3333", bg="#161620", font=("Segoe UI", 9, "italic"))
+pc_zip_label = tk.Label(pc_zip_frame, text="Keine ZIP ausgewaehlt", fg="#ff3333", bg="#161620", font=("Segoe UI", 9, "italic"))
 pc_zip_label.pack(side=tk.LEFT, padx=10)
 pc_act_frame = tk.Frame(tab_pc, bg="#161620")
 pc_act_frame.pack(pady=20)
@@ -177,4 +181,3 @@ scrollbar.config(command=log_text.yview)
 import threading
 change_language()
 root.mainloop()
-
