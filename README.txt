@@ -37,4 +37,38 @@
      ESP8266-WLAN-Sticks zu betreiben.
    - Die Dateisystem-Kompilierung nutzt das offizielle mkspiffs-Werkzeug (MIT-Lizenz).
    - Die Hardware-Flash-Routinen werden ueber das integrierte esptool (GPL v2) ausgefuehrt.
+
 ===========================================================
+ HOW TO BUILD FROM SOURCE (MANUAL COMPILATION)
+===========================================================
+
+If you want to compile the standalone binary yourself instead of using the pre-built files, follow these native cross-platform instructions. Ensure you have **Python 3.10+** and **PyInstaller** installed.
+
+### 🪟 1. Building on Windows
+Open your Windows Command Prompt (CMD) or PowerShell inside the source directory and run:
+
+1. Install the required serial drivers:
+   ```bash
+   pip install pyserial
+   ```
+2. Invoke PyInstaller to package the graphical interface into a single standalone executable:
+   ```bash
+   python -m PyInstaller --clean --noconsole --onefile --name="universal-offline-deployment-suite_v0.0.5-Test" gui_main.py
+   ```
+3. Your compiled standalone application will be located inside the generated `\dist\` folder.
+
+### 🐧 2. Building on Linux
+Open your Linux Terminal inside the source directory and run:
+
+1. Install the required serial communication libraries (requires system packages permissions on modern distros):
+   ```bash
+   sudo python3 -m pip install pyserial --break-system-packages
+   ```
+2. Invoke the native Linux PyInstaller engine to generate an uncompressed standalone ELF binary:
+   ```bash
+   python3 -m PyInstaller --clean --noconsole --onefile --name="universal-offline-deployment-suite_v0.0.5-Linux" gui_main.py
+   ```
+3. Your native executable file will be located inside the generated `/dist/` directory. Grant execution permissions before running it:
+   ```bash
+   chmod +x dist/universal-offline-deployment-suite_v0.0.5-Linux
+   ./dist/universal-offline-deployment-suite_v0.0.5-Linux
